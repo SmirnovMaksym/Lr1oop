@@ -6,10 +6,11 @@ namespace Smirnov_Maxim_lr1
     {
         static void Main()
         {
-            Game game = new Game();
+            GetGame games = new GetGame();
+            var game = games.Game();
             
-            GameAccount Max = new GameAccount("Max");
-            GameAccount Zoe = new GameAccount("Zoe");
+            GameAccount Max = new OnlyWin("Max");
+            GameAccount Zoe = new OnlyLose("Zoe");
 
             double rate = 20;
             
@@ -18,6 +19,7 @@ namespace Smirnov_Maxim_lr1
             game.Play(Max, Zoe, rate);
             game.Play(Zoe, Max, rate);
             game.Play(Max, Zoe, rate);
+            game.Play(Zoe, Max, rate);
             game.Play(Zoe, Max, rate);
             game.Play(Max, Zoe, rate);
             game.Play(Zoe, Max, rate);

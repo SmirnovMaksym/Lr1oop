@@ -31,10 +31,10 @@ public class GameAccount
         }
     }
 
-    private List<GameAccountStats> stats = new List<GameAccountStats>();
-    private string UserName;
-    private double CurrentRating = 1000;
-    private int GamesCount = 0;
+    protected List<GameAccountStats> stats = new List<GameAccountStats>();
+    protected string UserName;
+    protected double CurrentRating = 1000;
+    protected int GamesCount = 0;
 
     public GameAccount(string UserName)
     {
@@ -55,18 +55,24 @@ public class GameAccount
         get { return UserName; }
     }
 
-    public void WinGame(string opponentName, double rate)
+    public virtual void WinGame(BaseGame game)
     { 
-        CurrentRating += rate;
+        if (game.stats.Count != 0)
+        {
+            CurrentRating += game.stats[^1].Rate;
+            stats.Add(new GameAccountStats(game.stats[^1].Loser, game.stats[^1].Rate, true));
+        }
         GamesCount += 1;
-        stats.Add(new GameAccountStats(opponentName, rate, true));
     }
 
-    public void LoseGame(string opponentName, double rate)
+    public virtual void LoseGame(BaseGame game)
     {
-        CurrentRating -= rate;
+        if (game.stats.Count != 0)
+        {
+            CurrentRating -= game.stats[^1].Rate;
+            stats.Add(new GameAccountStats(game.stats[^1].Winner, game.stats[^1].Rate, false));
+        }
         GamesCount += 1;
-        stats.Add(new GameAccountStats(opponentName, rate, false));
     }
 
     public void GetStats()
@@ -82,6 +88,65 @@ public class GameAccount
             {
                 Console.WriteLine("\tgame {0} lose. Opponent: {1}. Rate {2}", i + 1, stats[i].NameOpponent, stats[i].Rate);
             }
+        }
+    }
+}
+
+public class OnlyWin : GameAccount
+{
+    public OnlyWin(string UserName)
+    {
+        this.UserName = UserName;
+    }
+    
+    public override void LoseGame(BaseGame game)
+    {
+        GamesCount += 1;
+        if (game.stats.Count != 0)
+        {
+            stats.Add(new GameAccountStats(game.stats[^1].Winner, 0, false));
+        }
+    }
+}
+
+public class OnlyLose : GameAccount
+{
+    public OnlyLose(string UserName)
+    {
+        this.UserName = UserName;
+    }
+    
+    public override void WinGame(BaseGame game)
+    {
+        GamesCount += 1;
+        if (game.stats.Count != 0)
+        {
+            stats.Add(new GameAccountStats(game.stats[^1].Loser, 0, true));
+        }
+    }
+}
+
+public class Intangible : GameAccount
+{
+    public Intangible(string UserName)
+    {
+        this.UserName = UserName;
+    }
+    
+    public override void WinGame(BaseGame game)
+    {
+        GamesCount += 1;
+        if (game.stats.Count != 0)
+        {
+            stats.Add(new GameAccountStats(game.stats[^1].Loser, 0, true));
+        }
+    }
+    public override void LoseGame(BaseGame game)
+    {
+        GamesCount += 1;
+        if (game.stats.Count != 0)
+        {
+            stats.Add(new GameAccountStats(game.stats[^1].Winner, 0, false));
         }
     }
 }

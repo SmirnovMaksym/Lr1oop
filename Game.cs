@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Smirnov_Maxim_lr1;
 
-public class Game
+public abstract class BaseGame
 {
-    private int GamesCount = 0;
+    protected int GamesCount = 0;
 
     public class GameStats
     {
@@ -34,26 +34,8 @@ public class Game
         }
     }
 
-    private List<GameStats> stats = new List<GameStats>();
-    public void Play(GameAccount winner, GameAccount loser, double rate)
-    {
-        if (rate < 0)
-        {
-            throw new Exception("Rate < 0");
-        }
-
-        if (loser.UseCurrentRating - rate > 0)
-        {
-            winner.WinGame(loser.UseUserName, rate);
-            loser.LoseGame(winner.UseUserName, rate);
-            stats.Add(new GameStats(winner.UseUserName, loser.UseUserName, rate));
-            GamesCount += 1;
-        }
-        else
-        {
-            throw new Exception("Loser rate - Rate <= 0");
-        }
-    }
+    public List<GameStats> stats = new List<GameStats>();
+    public abstract void Play(GameAccount winner, GameAccount loser, double rate);
 
     public void GetStats()
     {
@@ -63,5 +45,98 @@ public class Game
             Console.WriteLine("|\t{0}\t|\t{1}\t|\t{2}\t|", stats[i].Winner, stats[i].Loser, stats[i].Rate);
         }
         
+    }
+}
+public class Game : BaseGame
+{
+    public override void Play(GameAccount winner, GameAccount loser, double rate)
+    {
+        if (rate < 0)
+        {
+            throw new Exception("Rate < 0");
+        }
+
+        if (loser.UseCurrentRating - rate > 0)
+        {
+            stats.Add(new GameStats(winner.UseUserName, loser.UseUserName, rate));
+            winner.WinGame(this);
+            loser.LoseGame(this);
+            
+            GamesCount += 1;
+        }
+        else
+        {
+            throw new Exception("Loser rate - Rate <= 0");
+        }
+    }
+}
+
+public class ReverseOpponent : BaseGame
+{
+    public override void Play(GameAccount winner, GameAccount loser, double rate)
+    {
+        if (rate < 0)
+        {
+            throw new Exception("Rate < 0");
+        }
+
+        if (loser.UseCurrentRating - rate > 0)
+        {
+            stats.Add(new GameStats(loser.UseUserName, winner.UseUserName, rate));
+            loser.WinGame(this);
+            winner.LoseGame(this);
+            
+            GamesCount += 1;
+        }
+        else
+        {
+            throw new Exception("Loser rate - Rate <= 0");
+        }
+    }
+}
+
+public class NoRating : BaseGame
+{
+    public override void Play(GameAccount winner, GameAccount loser, double rate)
+    {
+        if (rate < 0)
+        {
+            throw new Exception("Rate < 0");
+        }
+
+        if (loser.UseCurrentRating - rate > 0)
+        {
+            stats.Add(new GameStats(winner.UseUserName, loser.UseUserName, 0));
+            loser.WinGame(this);
+            winner.LoseGame(this);
+            
+            GamesCount += 1;
+        }
+        else
+        {
+            throw new Exception("Loser rate - Rate <= 0");
+        }
+    }
+}
+
+public class NoStats : BaseGame
+{
+    public override void Play(GameAccount winner, GameAccount loser, double rate)
+    {
+        if (rate < 0)
+        {
+            throw new Exception("Rate < 0");
+        }
+
+        if (loser.UseCurrentRating - rate > 0)
+        {
+            loser.WinGame(this);
+            winner.LoseGame(this);
+            GamesCount += 1;
+        }
+        else
+        {
+            throw new Exception("Loser rate - Rate <= 0");
+        }
     }
 }
